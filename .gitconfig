@@ -1,0 +1,20 @@
+# To use this config file, run
+#
+#   git config --local include.path ../.gitconfig
+#
+# from the top level of this repository.
+# Reference: https://stackoverflow.com/a/18330114 for 
+[alias]
+# Aliases to output git history graph in a graphviz compatible format
+#
+# More about graphviz: https://en.wikipedia.org/wiki/Graphviz
+# Where I found the original version of this alias:
+#   https://git.wiki.kernel.org/index.php/Aliases#Use_graphviz_for_display
+# Graphviz shapes documentation: https://graphviz.org/doc/info/shapes.html
+#
+# Output a git history graph that includes branch names
+	graphviz-with-branches = "!f() { echo 'digraph git {' ; echo '{\n  node [ shape=rectangle ]' ; git log --decorate=short --pretty='format:  \"%D\" []'  \"$@\" | awk -F ',| |\"' '{ if (NF == 6) {print $0} else { for (i=1;i<NF;i++) {if ($i!=\"->\") {printf(\"  \\\"%s\\\" %s\\n\", $i, $NF)}}} }' | sed '/\"\"/d' ; echo '}' ; git log --decorate=short --pretty='format:  \"%D\" -> { \"%h\" }' \"$@\" | awk -F ',| |\"|{|}' '{ if (NF == 13) {print $0} else { for (i=1;i<NF-3;i++) {if ($i==\"HEAD\" && $(i+1)==\"->\") {printf(\"  \\\"%s\\\" -> { \\\"%s\\\" }\\n\", $i, $(i+2))} else if ($i!=\"->\") {printf(\"  \\\"%s\\\" -> { \\\"%s\\\" }\\n\", $i, $(NF-3))}}} }' | sed '/\"\" -> {.*}/d' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '\n  rankdir=RL' ; echo '}'; }; f"
+# Output a git history graph that does not include branch names
+	graphviz-no-branches = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '\n  rankdir=RL' ; echo '}'; }; f"
+# Set our default graphviz alias to show branch names
+	graphviz = graphviz-with-branches
